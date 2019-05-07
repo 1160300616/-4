@@ -8,7 +8,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "extmem-c\extmem.c"
-#define Address 31415926
+#include <time.h>
+#define Raddress 31415926
 #define Block_size 64
 typedef struct {
     int A;
@@ -28,40 +29,38 @@ TypeR *getRandomR(Buffer *buf)
         perror("Buffer Initialization Failed!\n");
         return -1;
     }
+    srand((unsigned)time( NULL ) );
     for(n=0;n<16;n++)
     {
         if((blk = getNewBlockInBuffer(&buf))==NULL)
         {
             printf("failed to get Block!\n");
         }
-        printf("%p\n",blk);
         for(i=0;i<7;i++)
         {
-            (blk+i)->A=i+1;
-            (blk+i)->B=i+1;
+            (blk+i)->A=rand()%40+1;
+            (blk+i)->B=rand()%1000+1;
         }
-    int *next = (blk+7);
-    *next = Address+Block_size*(n+1);
-    printf("%p\n",*next);
-    if (writeBlockToDisk(blk, Address+Block_size*n, &buf) != 0)
-    {
-        perror("Writing Block Failed!\n");
-        return -1;
-    }
-    /*
-    if ((blk = readBlockFromDisk(Address+Block_size*n, &buf)) == NULL)
-    {
-        perror("Reading Block Failed!\n");
-        return -1;
-    }
-
+        int *next = (blk+7);
+        *next = Raddress+Block_size*(n+1);
+        if (writeBlockToDisk(blk, Raddress+Block_size*n, &buf) != 0)
+        {
+            perror("Writing Block Failed!\n");
+            return -1;
+        }
+        /*
+        if ((blk = readBlockFromDisk(*next-Block_size, &buf)) == NULL)
+        {
+            perror("Reading Block Failed!\n");
+            return -1;
+        }
+        printf("\n");
         for (i = 0; i < 7; i++)
         {
-            printf("%d,%d\n", (blk+i)->A,(blk+i)->A);
+            printf("%d,%d\n", (blk+i)->A,(blk+i)->B);
             freeBlockInBuffer(blk,&buf);
         }
         */
-
     }
 
 }
