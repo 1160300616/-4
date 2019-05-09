@@ -274,7 +274,7 @@ void sortR(TypeR *blk)
     }
     return;
 }
-void MergeSortR(Buffer *buf)
+void MyMergeSortR(Buffer *buf)
 {
     int m=0;
     int l=0;
@@ -427,8 +427,202 @@ void MergeSortR(Buffer *buf)
                 freeBlockInBuffer(temp2,buf);
             }
 
-
     }
+}
+void MergeSortR(Buffer *buf)
+{
+    int m=0;
+    int l=0;
+    int k=0;
+    int i=0;
+    int j=0;
+    int n=0;
+    int Rresult =300;
+    TypeR *blk1;
+    TypeR *blk2;
+    TypeR *temp1;
+    TypeR *temp2;
+    TypeR *tempBlock;
+    TypeS *blk3;
+    TypeS *blk4;
+    int index = 0;
+    tempBlock = getNewBlockInBuffer(buf);
+    int arr1[400];
+    int arr2[400];
+    int t =0;
+    int temp;
+    for(i=0;i<16;i++)
+    {
+        blk1 = readBlockFromDisk(Raddress+i*Block_size,buf);
+        for(j=0;j<7;j++)
+        {
+
+            arr1[t] = (blk1+j)->A;
+            arr2[t] = (blk1+j)->B;
+            t++;
+        }
+        freeBlockInBuffer(blk1,buf);
+    }
+    for(i=0;i<16*7;i++)
+    {
+        for(j=i;j<16*7;j++)
+        {
+            if(arr1[i]>arr1[j])
+            {
+                temp = arr1[i];
+                arr1[i] = arr1[j];
+                arr1[j]=temp;
+                temp = arr2[i];
+                arr2[i] = arr2[j];
+                arr2[j]=temp;
+            }
+        }
+    }
+    t=0;
+    for(i=0;i<16;i++)
+    {
+        blk1 = getNewBlockInBuffer(buf);
+        for(j=0;j<7;j++)
+        {
+
+            (blk1+j)->A=arr1[t];
+            (blk1+j)->B=arr2[t];
+            printf("%d,%d\n",(blk1+j)->A,(blk1+j)->B);
+            t++;
+        }
+        writeBlockToDisk(blk1,Raddress+i*Block_size,buf);
+        freeBlockInBuffer(blk1,buf);
+    }
+    for(i=0;i<32;i++)
+    {
+        blk3 = readBlockFromDisk(Saddress+i*Block_size,buf);
+        for(j=0;j<7;j++)
+        {
+
+            arr1[t] = (blk3+j)->C;
+            arr2[t] = (blk3+j)->D;
+            t++;
+        }
+        freeBlockInBuffer(blk3,buf);
+    }
+    for(i=0;i<32*7;i++)
+    {
+        for(j=i;j<32*7;j++)
+        {
+            if(arr1[i]>arr1[j])
+            {
+                temp = arr1[i];
+                arr1[i] = arr1[j];
+                arr1[j]=temp;
+                temp = arr2[i];
+                arr2[i] = arr2[j];
+                arr2[j]=temp;
+            }
+        }
+    }
+    t=0;
+    for(i=0;i<32;i++)
+    {
+        blk3 = getNewBlockInBuffer(buf);
+        for(j=0;j<7;j++)
+        {
+
+            (blk3+j)->C=arr1[t];
+            (blk3+j)->D=arr2[t];
+            printf("%d,%d\n",(blk3+j)->C,(blk3+j)->D);
+            t++;
+        }
+        writeBlockToDisk(blk3,Saddress+i*Block_size,buf);
+        freeBlockInBuffer(blk3,buf);
+    }
+    /*    for(n=0;n<16;n=n+2)
+        {
+                printf("%d\n\n",n);
+                blk1 = readBlockFromDisk(Raddress+n*Block_size,buf);
+                blk2 = readBlockFromDisk(Raddress+(n+1)*Block_size,buf);
+                i=0;
+                j=0;
+                temp1 = blk1 ;
+                temp2 = blk2 ;
+                int index1 = 0;
+                int index2 = 0;
+                while(i<7&&j<7)
+                {
+
+                    if(temp1->A > temp2->A)
+                    {
+                        (tempBlock+index)->A = temp2->A;
+                        (tempBlock+index)->B = temp2->B;
+                        j++;
+                        index ++;
+                        temp2 = blk2+j;
+                    }
+                    else
+                    {
+                        (tempBlock+index)->A = temp1->A;
+                        (tempBlock+index)->B = temp1->B;
+                        i++;
+                        index++;
+                        temp1 = blk1+i;
+                    }
+                    if(index>6)
+                    {
+                        for(k=0;k<7;k++)
+                        {
+                            printf("%d\n",(tempBlock+k)->A);
+
+                        }
+                        printf("\n");
+                        writeBlockToDisk(tempBlock,Rresult,buf);
+                        freeBlockInBuffer(tempBlock,buf);
+                        tempBlock = getNewBlockInBuffer(buf);
+                        index = 0;
+
+                    }
+                }
+                for(j=j;j<7;j++)
+                {
+                        (tempBlock+index)->A = (blk2+j)->A;
+                        (tempBlock+index)->B = (blk2+j)->B;
+                        index ++;
+                        if(index>6)
+                        {
+                            for(k=0;k<7;k++)
+                            {
+                                printf("%d\n",(tempBlock+k)->A);
+
+                            }
+                            printf("\n");
+                            writeBlockToDisk(tempBlock,Rresult,buf);
+                            freeBlockInBuffer(tempBlock,buf);
+                            tempBlock = getNewBlockInBuffer(buf);
+                            index =0;
+                        }
+                    }
+
+                for(i=i;i<7;i++)
+                {
+                    (tempBlock+index)->A = (blk1+i)->A;
+                    (tempBlock+index)->B = (blk1+i)->B;
+                    index++;
+                    if(index>6)
+                    {
+                        for(k=0;k<7;k++)
+                        {
+                            printf("%d\n",(tempBlock+k)->A);
+
+                        }
+                        printf("\n");
+                        writeBlockToDisk(tempBlock,Rresult,buf);
+                        freeBlockInBuffer(tempBlock,buf);
+                        tempBlock = getNewBlockInBuffer(buf);
+                        index = 0;
+                    }
+                }
+                freeBlockInBuffer(temp1,buf);
+                freeBlockInBuffer(temp2,buf);
+        }
+         */
 }
 void SelectByBinary(Buffer *buf)
 {
@@ -441,13 +635,15 @@ void SelectByBinary(Buffer *buf)
         blkR = readBlockFromDisk(Raddress+i*Block_size,buf);
         sortR(blkR);
         writeBlockToDisk(blkR,Raddress+i*Block_size,buf);
+        freeBlockInBuffer(blkR,buf);
     }
 
     for(i=0;i<32;i++)
     {
         blkS = readBlockFromDisk(Saddress+i*Block_size,buf);
-        sortR(blkS);
+        sortS(blkS);
         writeBlockToDisk(blkS,Saddress+i*Block_size,buf);
+        freeBlockInBuffer(blkS,buf);
     }
     MergeSortR(buf);
 }
