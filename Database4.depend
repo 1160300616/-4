@@ -1,8 +1,10 @@
 # depslib dependency file v1.0
-1557230501 source:f:\database4\main.c
+1557418012 source:f:\database4\main.c
 	<stdlib.h>
 	<stdio.h>
 	"extmem-c\extmem.c"
+	<time.h>
+	<math.h>
 
 1552894754 f:\database4\extmem-c\extmem.c
 	<stdlib.h>
