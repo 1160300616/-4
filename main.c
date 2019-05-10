@@ -288,6 +288,12 @@ void MyMergeSortR(Buffer *buf)
     TypeR *temp1;
     TypeR *temp2;
     TypeR *tempBlock;
+
+    TypeS *blkS1;
+    TypeS *blkS2;
+    TypeS *tempS1;
+    TypeS *tempS2;
+    TypeS *tempBlockS;
     int index = 0;
     tempBlock = getNewBlockInBuffer(buf);
 
@@ -521,6 +527,7 @@ void MergeSortR(Buffer *buf)
         }
     }
     t=0;
+    printf("-----------------------\n");
     for(i=0;i<32;i++)
     {
         blk3 = getNewBlockInBuffer(buf);
@@ -624,6 +631,291 @@ void MergeSortR(Buffer *buf)
         }
          */
 }
+
+int Binary_SearchR(Buffer *buf, int N, int keyword)
+{
+    int low = 0, high = N-1,mid;
+    TypeR *blk;
+    int blockN =0;
+    int index =0;
+    while(low <= high)
+    {
+        mid = (low + high)/2;
+        blockN =(int) mid/7;
+        index = mid % 7;
+        blk = readBlockFromDisk(Raddress+blockN*Block_size,buf);
+        if((blk+index)->A == keyword)
+        {
+            printf("Successful find tuple:%d,%d\n",(blk+index)->A,(blk+index)->B);
+            freeBlockInBuffer(blk,buf);
+            return mid;
+        }
+        if((blk+index)->A < keyword)
+        {
+            low = mid + 1;
+        }
+        else
+        {
+            high = mid -1;
+        }
+        freeBlockInBuffer(blk,buf);
+    }
+    printf("No suitable tuple!\n");
+    return -1;
+}
+int Binary_SearchS(Buffer *buf, int N, int keyword)
+{
+    int low = 0, high = N-1,mid;
+    TypeS *blk;
+    int blockN =0;
+    int index =0;
+    while(low <= high)
+    {
+        mid = (low + high)/2;
+        blockN =(int) mid/7;
+        index = mid % 7;
+        blk = readBlockFromDisk(Saddress+blockN*Block_size,buf);
+        if((blk+index)->C == keyword)
+        {
+            printf("Successful find tuple:%d,%d\n",(blk+index)->C,(blk+index)->D);
+            freeBlockInBuffer(blk,buf);
+            return mid;
+        }
+        if((blk+index)->C < keyword)
+        {
+            low = mid + 1;
+        }
+        else
+        {
+            high = mid -1;
+        }
+        freeBlockInBuffer(blk,buf);
+    }
+    printf("No suitable tuple!\n");
+    return -1;
+}
+void findAllR(Buffer *buf,int index,int keyword)
+{
+    int outputR = 300;
+    int outSize = 0;
+    int i,j,k,t;
+    TypeR *blk;
+    TypeR *output;
+    int blockN =0;
+    int index_temp =0;
+    int Tindex = 0;
+    blockN =(int) index/7;
+    index_temp = index % 7;
+    t = index_temp;
+    int temp_block = blockN;
+    int flag1 = 1;
+    int flag2 = 1;
+    blk = readBlockFromDisk(Raddress+blockN*Block_size,buf);
+    output = getNewBlockInBuffer(buf);
+    while(flag1)
+    {
+        for(i=t;i>=0;i--)
+        {
+            if((blk+i)->A==keyword)
+            {
+                (output+Tindex)->A = (blk+i)->A;
+                (output+Tindex)->B = (blk+i)->B;
+                printf("find tuple:%d,%d\n",(blk+i)->A,(blk+i)->B);
+                Tindex ++;
+            }
+            else
+            {
+                flag1 = 0;
+                break;
+            }
+            if(Tindex>6)
+            {
+                writeBlockToDisk(output,outputR+outSize,buf);
+                outSize++;
+                Tindex = 0;
+                output = getNewBlockInBuffer(buf);
+            }
+        }
+        temp_block --;
+        t = 7;
+        freeBlockInBuffer(blk,buf);
+        if(temp_block>=0)
+        blk = readBlockFromDisk(Raddress+temp_block*Block_size,buf);
+        else
+        {
+            break;
+        }
+    }
+    writeBlockToDisk(output,outputR+outSize,buf);
+    outSize++;
+
+    blk = readBlockFromDisk(Raddress+blockN*Block_size,buf);
+    temp_block = blockN;
+    t = index_temp;
+    if(t+1<7)
+    {
+        t++;
+    }
+    else
+    {
+        t = 0;
+        temp_block ++;
+        freeBlockInBuffer(blk,buf);
+        if(temp_block<16)
+        blk = readBlockFromDisk(Raddress+temp_block*Block_size,buf);
+        else
+        {
+            return ;
+        }
+    }
+    while(flag2)
+    {
+        for(i=t;i<7;i++)
+        {
+            if((blk+i)->A==keyword)
+            {
+                (output+Tindex)->A = (blk+i)->A;
+                (output+Tindex)->B = (blk+i)->B;
+                printf("find tuple:%d,%d\n",(blk+i)->A,(blk+i)->B);
+                Tindex ++;
+            }
+            else
+            {
+                flag2 = 0;
+                break;
+            }
+            if(Tindex>6)
+            {
+                writeBlockToDisk(output,outputR+outSize,buf);
+                outSize++;
+                Tindex = 0;
+                output = getNewBlockInBuffer(buf);
+            }
+        }
+        temp_block ++;
+        t = 0;
+        freeBlockInBuffer(blk,buf);
+        if(temp_block<16)
+        blk = readBlockFromDisk(Raddress+temp_block*Block_size,buf);
+        else
+        {
+            break;
+        }
+    }
+    writeBlockToDisk(output,outputR+outSize,buf);
+    outSize++;
+}
+void findAllS(Buffer *buf,int index,int keyword)
+{
+    int outputS = 350;
+    int outSize = 0;
+    int i,j,k,t;
+    TypeS *blk;
+    TypeS *output;
+    int blockN =0;
+    int index_temp =0;
+    int Tindex = 0;
+    blockN =(int) index/7;
+    index_temp = index % 7;
+    t = index_temp;
+    int temp_block = blockN;
+    int flag1 = 1;
+    int flag2 = 1;
+    blk = readBlockFromDisk(Saddress+blockN*Block_size,buf);
+    output = getNewBlockInBuffer(buf);
+    while(flag1)
+    {
+        for(i=t;i>=0;i--)
+        {
+            if((blk+i)->C==keyword)
+            {
+                (output+Tindex)->C = (blk+i)->C;
+                (output+Tindex)->D = (blk+i)->D;
+                printf("find tuple:%d,%d\n",(blk+i)->C,(blk+i)->D);
+                Tindex ++;
+            }
+            else
+            {
+                flag1 = 0;
+                break;
+            }
+            if(Tindex>6)
+            {
+                writeBlockToDisk(output,outputS+outSize,buf);
+                outSize++;
+                Tindex = 0;
+                output = getNewBlockInBuffer(buf);
+            }
+        }
+        temp_block --;
+        t = 7;
+        freeBlockInBuffer(blk,buf);
+        if(temp_block>=0)
+        blk = readBlockFromDisk(Saddress+temp_block*Block_size,buf);
+        else
+        {
+            break;
+        }
+    }
+    writeBlockToDisk(output,outputS+outSize,buf);
+    outSize++;
+
+    blk = readBlockFromDisk(Saddress+blockN*Block_size,buf);
+    temp_block = blockN;
+    t = index_temp;
+    if(t+1<7)
+    {
+        t++;
+    }
+    else
+    {
+        t = 0;
+        temp_block ++;
+        freeBlockInBuffer(blk,buf);
+        if(temp_block<32)
+        blk = readBlockFromDisk(Raddress+temp_block*Block_size,buf);
+        else
+        {
+            return ;
+        }
+    }
+    while(flag2)
+    {
+        for(i=t;i<7;i++)
+        {
+            if((blk+i)->C==keyword)
+            {
+                (output+Tindex)->C = (blk+i)->C;
+                (output+Tindex)->D = (blk+i)->D;
+                printf("find tuple:%d,%d\n",(blk+i)->C,(blk+i)->D);
+                Tindex ++;
+            }
+            else
+            {
+                flag2 = 0;
+                break;
+            }
+            if(Tindex>6)
+            {
+                writeBlockToDisk(output,outputS+outSize,buf);
+                outSize++;
+                Tindex = 0;
+                output = getNewBlockInBuffer(buf);
+            }
+        }
+        temp_block ++;
+        t = 0;
+        freeBlockInBuffer(blk,buf);
+        if(temp_block<32)
+        blk = readBlockFromDisk(Saddress+temp_block*Block_size,buf);
+        else
+        {
+            break;
+        }
+    }
+    writeBlockToDisk(output,outputS+outSize,buf);
+    outSize++;
+}
 void SelectByBinary(Buffer *buf)
 {
     int i=0;
@@ -646,6 +938,10 @@ void SelectByBinary(Buffer *buf)
         freeBlockInBuffer(blkS,buf);
     }
     MergeSortR(buf);
+    int index = Binary_SearchR(buf,7*16,40);
+    findAllR(buf,index,40);
+    index = Binary_SearchS(buf,32*7,60);
+    findAllS(buf,index,60);
 }
 int main(int argc, char **argv)
 {
@@ -659,6 +955,7 @@ int main(int argc, char **argv)
         perror("Buffer Initialization Failed!\n");
         return -1;
     }
+
     getRandomS(&buf);
     getRandomR(&buf);
     SelectByBinary(&buf);
