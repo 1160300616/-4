@@ -499,6 +499,11 @@ void MergeSortR(Buffer *buf)
         writeBlockToDisk(blk1,Raddress+i*Block_size,buf);
         freeBlockInBuffer(blk1,buf);
     }
+
+    blk1 = getNewBlockInBuffer(buf);
+    freeBlockInBuffer(blk1,buf);
+
+    t=0;
     for(i=0;i<32;i++)
     {
         blk3 = readBlockFromDisk(Saddress+i*Block_size,buf);
@@ -930,6 +935,7 @@ void SelectByBinary(Buffer *buf)
         freeBlockInBuffer(blkR,buf);
     }
 
+
     for(i=0;i<32;i++)
     {
         blkS = readBlockFromDisk(Saddress+i*Block_size,buf);
@@ -955,9 +961,9 @@ int main(int argc, char **argv)
         perror("Buffer Initialization Failed!\n");
         return -1;
     }
-
+    /*
     getRandomS(&buf);
-    getRandomR(&buf);
+    getRandomR(&buf); */
     SelectByBinary(&buf);
 
     /*
